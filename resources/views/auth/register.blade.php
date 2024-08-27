@@ -1,15 +1,51 @@
-<form id="registerForm">
-    <input type="text" name="name" id="name" required>
-    <input type="email" name="email" id="email" required>
-    <input type="text" name="phone" id="phone" required>
-    <input type="password" name="password" id="password" required>
-    <select name="amount" id="amount" required>
-        <option value="30000">6 Months - INR 300</option>
-        <option value="50000">12 Months - INR 500</option>
-    </select>
-    <button type="submit">Register</button>
-</form>
 
+@extends('layouts.app')
+
+@section('content')
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white text-center">
+                    <h4>Register</h4>
+                </div>
+                <div class="card-body">
+                    <form id="registerForm" autocomplete="off">
+                        <div class="form-group mb-3">
+                            <label for="name">Full Name</label>
+                            <input type="text" class="form-control" id="name" name="name" placeholder="Enter your full name" required autocomplete="off">
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="email">Email Address</label>
+                            <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email" required autocomplete="off">
+                        </div>
+                        <div class="form-group mb-3">
+                            <label for="phone">Phone Number</label>
+                            <input type="text" class="form-control" id="phone" name="phone" placeholder="Enter your phone number" required autocomplete="off">
+                        </div>
+                        <div class="form-group mb-4">
+                            <label for="password">Password</label>
+                            <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password" required autocomplete="off">
+                        </div>
+                        <div class="form-group mb-4">
+                            <label for="amount">Subscription Plan</label>
+                            <div class="input-group">
+                                <select class="form-control" id="amount" name="amount" required autocomplete="off">
+                                    <option value="" disabled selected>Select Subscription Plan</option>
+                                    <option value="30000">6 Months - INR 300</option>
+                                    <option value="50000">12 Months - INR 500</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Register</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Include Axios and Razorpay Script -->
 <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
@@ -22,29 +58,25 @@ document.getElementById('registerForm').addEventListener('submit', function(even
     let email = formData.get('email');
     let phone = formData.get('phone');
 
-    // Call your backend to create an order for Razorpay
     axios.post('https://apilihpikihna.org/api/create-order', { amount: amount })
         .then(function (response) {
             let order = response.data;
 
             var options = {
                 "key": "rzp_test_kWY517XZvg4gbN",
-                "amount": amount, // Amount in paise
+                "amount": amount,
                 "currency": "INR",
                 "name": name,
                 "description": "Subscription Plan",
                 "order_id": order.id,
                 "handler": function (paymentResponse) {
-                    // On successful payment
                     formData.append('razorpay_payment_id', paymentResponse.razorpay_payment_id);
                     formData.append('razorpay_order_id', paymentResponse.razorpay_order_id);
                     formData.append('razorpay_signature', paymentResponse.razorpay_signature);
 
-                    // Now submit the form data along with payment details to your backend
                     axios.post('https://apilihpikihna.org/api/register', formData)
                         .then(function (registerResponse) {
                             if (registerResponse.data.token) {
-                                // Redirect to the login page or dashboard
                                 window.location.href = "/dashboard";
                             }
                         })
@@ -69,3 +101,4 @@ document.getElementById('registerForm').addEventListener('submit', function(even
         });
 });
 </script>
+@endsection
